@@ -23,7 +23,7 @@
 
 ---
 
-**MARS is not a chatbot. It is an autonomous AI research department.**
+**MARS is not a chatbot. It is an autonomous AI Research Department.**
 
 Built for researchers, startups, and enterprises who need deep, verified, multi-source intelligence — not surface-level answers.
 
