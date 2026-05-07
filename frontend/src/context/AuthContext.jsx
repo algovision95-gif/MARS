@@ -7,15 +7,41 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [responseMode, setResponseMode] = useState(localStorage.getItem('algovision_response_mode') || 'simple');
+  const [theme, setTheme] = useState(localStorage.getItem('algovision_theme') || 'dark');
+  const [researchDepth, setResearchDepth] = useState(localStorage.getItem('algovision_depth') || 'standard');
+  const [autoSelectAgents, setAutoSelectAgents] = useState(localStorage.getItem('algovision_auto_agents') !== 'false');
+  const [liveOpsEnabled, setLiveOpsEnabled] = useState(localStorage.getItem('algovision_live_ops') !== 'false');
+  const [exportFormat, setExportFormat] = useState(localStorage.getItem('algovision_export_format') || 'pdf');
 
   useEffect(() => {
-    const token = localStorage.getItem('mars_token');
+    localStorage.setItem('algovision_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('algovision_depth', researchDepth);
+  }, [researchDepth]);
+
+  useEffect(() => {
+    localStorage.setItem('algovision_auto_agents', autoSelectAgents);
+  }, [autoSelectAgents]);
+
+  useEffect(() => {
+    localStorage.setItem('algovision_live_ops', liveOpsEnabled);
+  }, [liveOpsEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('algovision_export_format', exportFormat);
+  }, [exportFormat]);
+  useEffect(() => {
+    const token = localStorage.getItem('algovision_token');
     if (token) {
       api.get('/auth/me')
         .then(({ data }) => setUser(data))
         .catch(() => {
-          localStorage.removeItem('mars_token');
-          localStorage.removeItem('mars_user');
+          localStorage.removeItem('algovision_token');
+          localStorage.removeItem('algovision_user');
         })
         .finally(() => setLoading(false));
     } else {
@@ -25,25 +51,34 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
-    localStorage.setItem('mars_token', data.token);
-    localStorage.setItem('mars_user', JSON.stringify(data));
+    localStorage.setItem('algovision_token', data.token);
+    localStorage.setItem('algovision_user', JSON.stringify(data));
     setUser(data);
     setLoginModalOpen(false);
     return data;
   };
 
-  const signup = async (email, password) => {
-    const { data } = await api.post('/auth/signup', { email, password });
-    localStorage.setItem('mars_token', data.token);
-    localStorage.setItem('mars_user', JSON.stringify(data));
+  const signup = async (dataPayload) => {
+    const { data } = await api.post('/auth/signup', dataPayload);
+    localStorage.setItem('algovision_token', data.token);
+    localStorage.setItem('algovision_user', JSON.stringify(data));
+    setUser(data);
+    setLoginModalOpen(false);
+    return data;
+  };
+
+  const googleLogin = async (credential) => {
+    const { data } = await api.post('/auth/google', { credential });
+    localStorage.setItem('algovision_token', data.token);
+    localStorage.setItem('algovision_user', JSON.stringify(data));
     setUser(data);
     setLoginModalOpen(false);
     return data;
   };
 
   const logout = () => {
-    localStorage.removeItem('mars_token');
-    localStorage.removeItem('mars_user');
+    localStorage.removeItem('algovision_token');
+    localStorage.removeItem('algovision_user');
     setUser(null);
   };
 
@@ -56,8 +91,15 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{
-      user, loading, loginModalOpen,
-      setLoginModalOpen, login, signup, logout, refreshUser
+      user: user ? { ...user, subscriptionType: localStorage.getItem('algovision_sub_override') || user.subscriptionType } : null, 
+      loading, loginModalOpen,
+      setLoginModalOpen, login, signup, googleLogin, logout, refreshUser,
+      responseMode, setResponseMode,
+      theme, setTheme, toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark'),
+      researchDepth, setResearchDepth,
+      autoSelectAgents, setAutoSelectAgents,
+      liveOpsEnabled, setLiveOpsEnabled,
+      exportFormat, setExportFormat
     }}>
       {children}
     </AuthContext.Provider>

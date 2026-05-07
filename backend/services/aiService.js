@@ -1,58 +1,82 @@
 /**
- * AI Service — OpenRouter (primary) + Gemini (fallback)
+ * AI Service — Gemini Flash (FREE primary) + OpenRouter (secondary)
  */
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 
-export async function callAI(prompt, { systemPrompt = '', model = 'openai/gpt-4o-mini', jsonMode = false } = {}) {
-  const openRouterKey = process.env.OPENROUTER_API_KEY;
-  
-  // --- OpenRouter primary ---
-  if (openRouterKey && !openRouterKey.startsWith('YOUR_')) {
-    try {
-      const messages = [];
-      if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
-      messages.push({ role: 'user', content: prompt });
+// Try Gemini first (free tier), then OpenRouter as secondary
+export async function callAI(prompt, options = {}) {
+  const { systemPrompt = '', model = 'openai/gpt-4o-mini' } = options;
 
-      const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${openRouterKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://mars-research.app',
-          'X-Title': 'MARS Research Platform',
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
-        }),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        return json.choices?.[0]?.message?.content || '';
-      }
-    } catch (err) {
-      console.warn('⚠️  OpenRouter failed, falling back to Gemini:', err.message);
+  // PRIMARY: Gemini 1.5 Flash (free tier, generous limits)
+  try {
+    const result = await callGemini(prompt, systemPrompt, options);
+    if (result && result.length > 50) return result;
+    throw new Error('Empty Gemini response');
+  } catch (geminiErr) {
+    console.warn('⚠️  Gemini failed, trying OpenRouter:', geminiErr.message?.slice(0, 80));
+  }
+
+  // SECONDARY: OpenRouter
+  try {
+    const response = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://algovision.ai',
+        'X-Title': 'AlgoVision Research OS'
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        temperature: options.temperature || 0.7,
+        max_tokens: options.maxTokens || 2000
+      })
+    });
+
+    const json = await response.json();
+    if (json.choices?.[0]?.message?.content) {
+      return json.choices[0].message.content;
+    }
+    throw new Error(json.error?.message || 'OpenRouter empty response');
+  } catch (err) {
+    console.error('[AI Error] Both AI services failed:', err.message?.slice(0, 80));
+    return null;
+  }
+}
+
+async function callGemini(prompt, systemPrompt, options) {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  
+  // Try flash first, then pro as fallback
+  const models = ['gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-pro'];
+  
+  for (const modelName of models) {
+    try {
+      const modelInstance = genAI.getGenerativeModel({ model: modelName });
+      const fullPrompt = systemPrompt 
+        ? `${systemPrompt}\n\n${prompt}` 
+        : prompt;
+      
+      const result = await modelInstance.generateContent(fullPrompt);
+      const response = await result.response;
+      const text = response.text();
+      if (text && text.length > 20) return text;
+    } catch (e) {
+      // try next model
+      continue;
     }
   }
-
-  // --- Gemini fallback ---
-  const geminiKey = process.env.GEMINI_API_KEY;
-  if (!geminiKey || geminiKey.startsWith('YOUR_')) {
-    throw new Error('No valid AI API key configured. Set OPENROUTER_API_KEY or GEMINI_API_KEY in .env');
-  }
-  const ai = new GoogleGenAI({ apiKey: geminiKey });
-  const fullPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt;
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
-    contents: fullPrompt,
-  });
-  return response.text;
+  throw new Error('All Gemini models failed');
 }
 
 export function parseJSON(text) {
+  if (!text) return null;
   try {
     const match = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
     return match ? JSON.parse(match[0]) : null;

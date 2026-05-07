@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, GitCompare, AlertTriangle, Loader2, Lock, ChevronRight, Cpu, Network } from 'lucide-react';
+import { BookOpen, GitCompare, AlertTriangle, Loader2, Lock, ChevronRight, Cpu, Network, Target } from 'lucide-react';
 
 const agentConfig = {
   planner: {
@@ -52,6 +52,16 @@ const agentConfig = {
     border: 'border-red-400/20',
     dot: 'bg-red-400',
     tag: 'Step 5',
+  },
+  gapFinder: {
+    icon: Target,
+    title: 'Gap Finder',
+    description: 'Discovers unexplored areas, missing methodologies, and potential research opportunities.',
+    color: 'accentBlue',
+    gradient: 'from-accentBlue/10 to-accentBlue/5',
+    border: 'border-accentBlue/20',
+    dot: 'bg-accentBlue',
+    tag: 'Step 6',
   },
 };
 

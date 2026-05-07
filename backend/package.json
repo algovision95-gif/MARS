@@ -1,7 +1,7 @@
 {
-  "name": "mars-os-backend",
+  "name": "algovision-backend",
   "version": "1.0.0",
-  "description": "MARS OS - Multi-Agent Research Synthesizer Backend",
+  "description": "AlgoVision - AI Research Platform Backend",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@google/genai": "^0.7.0",
+    "@google/generative-ai": "^0.11.5",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -22,6 +22,7 @@
     "mongoose": "^8.0.0",
     "multer": "^1.4.5-lts.1",
     "neo4j-driver": "^5.14.0",
+    "nodemailer": "^8.0.5",
     "pdf-parse": "^1.1.1"
   },
   "devDependencies": {

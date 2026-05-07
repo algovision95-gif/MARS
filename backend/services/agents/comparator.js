@@ -8,18 +8,16 @@ export async function runComparator(content) {
 CONTENT:
 ${content.slice(0, 6000)}
 
-Return a JSON array:
-[
-  {"aspect": "Research Approach", "evaluation": "Description", "strength": "High", "evidence": "Specific detail"},
-  {"aspect": "Methodology Rigor", "evaluation": "Description", "strength": "Medium", "evidence": "Detail"},
-  {"aspect": "Dataset Quality", "evaluation": "Description", "strength": "High", "evidence": "Detail"},
-  {"aspect": "Results Clarity", "evaluation": "Description", "strength": "Medium", "evidence": "Detail"},
-  {"aspect": "Reproducibility", "evaluation": "Description", "strength": "Low", "evidence": "Detail"},
-  {"aspect": "Innovation Level", "evaluation": "Description", "strength": "High", "evidence": "Detail"},
-  {"aspect": "Practical Impact", "evaluation": "Description", "strength": "Medium", "evidence": "Detail"}
-]
-
-Strength must be one of: "High", "Medium", "Low"`;
+{
+  "comparisonTable": [
+    {"feature": "Feature name", "paperA": "Value A", "paperB": "Value B", "consensus": "Consensus text"}
+  ],
+  "evaluationMatrix": [
+    {"aspect": "Aspect Name", "score": 9, "rationale": "Reasoning"}
+  ],
+  "strengths": ["Strength 1", "Strength 2"],
+  "weaknesses": ["Weakness 1", "Weakness 2"]
+}`;
 
   try {
     const raw = await callAI(prompt, { systemPrompt: SYSTEM, jsonMode: true });

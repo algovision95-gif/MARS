@@ -17,7 +17,7 @@ export async function connectMongoDB() {
     if (msg.includes('querySrv') || msg.includes('ECONNREFUSED') || msg.includes('ENOTFOUND')) {
       console.error('   Fix Option 1: Go to https://cloud.mongodb.com → Resume cluster if PAUSED');
       console.error('   Fix Option 2: Network Access → Add IP → Allow from Anywhere (0.0.0.0/0)');
-      console.error('   Fix Option 3: Use local MongoDB — set MONGO_URI=mongodb://localhost:27017/mars in .env\n');
+      console.error('   Fix Option 3: Use local MongoDB — set MONGO_URI=mongodb://localhost:27017/algovision in .env\n');
     } else if (msg.includes('Authentication') || msg.includes('auth')) {
       console.error('   Fix: Check MongoDB username/password in your MONGO_URI in .env\n');
     }
@@ -26,17 +26,35 @@ export async function connectMongoDB() {
   }
 }
 
-export function connectNeo4j() {
-  try {
-    neo4jDriver = neo4j.driver(
-      process.env.NEO4J_URI,
-      neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD),
-      { connectionTimeout: 10000, maxConnectionPoolSize: 50 }
-    );
-    console.log('✅ Neo4j driver initialized');
-    return neo4jDriver;
-  } catch (err) {
-    console.error('⚠️  Neo4j connection failed:', err.message);
+export async function connectNeo4j() {
+  const uri = process.env.NEO4J_URI;
+  const user = process.env.NEO4J_USER;
+  const password = process.env.NEO4J_PASSWORD;
+
+  if (!uri || !user || !password) {
+    console.warn('⚠️  Neo4j credentials not found in .env — graph features disabled.');
     return null;
   }
+
+  try {
+    neo4jDriver = neo4j.driver(
+      uri,
+      neo4j.auth.basic(user, password),
+      { connectionTimeout: 15000, maxConnectionPoolSize: 50 }
+    );
+    // Verify connectivity
+    await neo4jDriver.verifyConnectivity();
+    console.log('✅ Connected to Neo4j');
+    return neo4jDriver;
+  } catch (err) {
+    console.warn('⚠️  Neo4j connection failed:', err.message);
+    console.warn('   Graph features will be disabled. Research will still work via MongoDB.');
+    neo4jDriver = null;
+    return null;
+  }
+}
+
+export function getNeo4jSession() {
+  if (!neo4jDriver) return null;
+  return neo4jDriver.session();
 }

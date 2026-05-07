@@ -27,12 +27,12 @@ async function extractDocxText(filePath) {
 
 async function transcribeAudio(filePath, mimetype) {
   try {
-    const { GoogleGenAI } = await import('@google/genai');
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const audioData = fs.readFileSync(filePath);
     const base64 = audioData.toString('base64');
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const response = await model.generateContent({
       contents: [{
         parts: [
           { inlineData: { mimeType: mimetype || 'audio/mpeg', data: base64 } },

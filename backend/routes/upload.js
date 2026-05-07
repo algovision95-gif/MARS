@@ -26,6 +26,7 @@ const storage = multer.diskStorage({
 const ALLOWED_TYPES = [
   'application/pdf',
   'text/plain',
+  'text/csv',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/x-wav',
   'video/mp4',
@@ -74,11 +75,13 @@ router.post('/', protect, upload.single('file'), async (req, res) => {
     }
 
     let fileType = 'document';
-    if (req.file.mimetype.startsWith('audio/')) fileType = 'audio';
+    if (req.file.mimetype === 'text/csv') fileType = 'dataset';
+    else if (req.file.mimetype.startsWith('audio/')) fileType = 'audio';
     else if (req.file.mimetype.startsWith('video/')) fileType = 'video';
 
     const uploadRecord = await Upload.create({
       userId: user._id,
+      projectId: req.body.projectId || null,
       filename: req.file.filename,
       originalName: req.file.originalname,
       mimetype: req.file.mimetype,

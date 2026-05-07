@@ -3,21 +3,21 @@ import { callAI, parseJSON } from '../aiService.js';
 const SYSTEM = `You are an expert AI research analyst. Extract structured information from research content.`;
 
 export async function runPaperReader(content) {
-  const prompt = `Deeply analyze the following research content and extract key information.
-
-CONTENT:
-${content.slice(0, 8000)}
-
-Return JSON:
-{
-  "methodology": "Detailed description of the research methodology used",
-  "dataset": "Description of datasets, data sources, or input data used",
-  "results": "Key findings, metrics, performance scores, and outcomes",
-  "limitations": "Described or apparent limitations of the research",
-  "summary": "A 2-3 sentence executive summary of the research",
-  "keyContributions": ["Contribution 1", "Contribution 2"],
-  "futureWork": "Suggested future research directions"
-}`;
+  const prompt = `Deeply analyze the following research content. Your goal is to provide a peer-review level analysis.
+  
+  CONTENT:
+  ${content.slice(0, 15000)}
+  
+  Return JSON:
+  {
+    "methodology": "Technical deep dive into the research design, variables, and framework",
+    "datasets": ["Specific dataset A", "Specific dataset B"],
+    "findings": ["Finding 1", "Finding 2"],
+    "limitations": "Critical analysis of research constraints or potential biases",
+    "innovationScore": 8.5, 
+    "innovationRationale": "Explanation of why this score was given",
+    "futureWork": ["Research question 1", "Research question 2"]
+  }`;
 
   try {
     const raw = await callAI(prompt, { systemPrompt: SYSTEM, jsonMode: true });

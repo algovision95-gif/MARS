@@ -3,13 +3,15 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { connectMongoDB } from './config/db.js';
+import { connectMongoDB, connectNeo4j } from './config/db.js';
 import { seedAdmin } from './utils/seedAdmin.js';
 import authRoutes from './routes/auth.js';
 import researchRoutes from './routes/research.js';
 import uploadRoutes from './routes/upload.js';
 import subscriptionRoutes from './routes/subscription.js';
 import adminRoutes from './routes/admin.js';
+import projectRoutes from './routes/project.js';
+import graphRoutes from './routes/graph.js';
 
 dotenv.config();
 
@@ -37,13 +39,15 @@ app.use('/api/research', researchRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/graph', graphRoutes);
 
 // Health check
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'MARS OS API v1.0', 
+    message: 'AlgoVision API v2.0', 
     status: 'running',
-    endpoints: ['/api/auth', '/api/research', '/api/upload', '/api/subscription', '/api/admin']
+    endpoints: ['/api/auth', '/api/research', '/api/upload', '/api/subscription', '/api/admin', '/api/projects', '/api/graph']
   });
 });
 
@@ -57,10 +61,12 @@ const PORT = process.env.PORT || 5000;
 
 async function start() {
   await connectMongoDB();
+  await connectNeo4j();
   await seedAdmin();
   app.listen(PORT, () => {
-    console.log(`\n🚀 MARS OS API running on http://localhost:${PORT}`);
+    console.log(`\n🚀 AlgoVision API v2.0 running on http://localhost:${PORT}`);
     console.log(`📖 Health check: http://localhost:${PORT}/`);
+    console.log(`🔗 Graph API: http://localhost:${PORT}/api/graph`);
   });
 }
 

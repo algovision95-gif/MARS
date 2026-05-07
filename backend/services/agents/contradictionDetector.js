@@ -3,26 +3,29 @@ import { callAI, parseJSON } from '../aiService.js';
 const SYSTEM = `You are an expert logical analyst specializing in detecting contradictions in research.`;
 
 export async function runContradictionDetector(content) {
-  const prompt = `Carefully analyze the following content for any conflicting claims, inconsistencies, or logical contradictions.
-
-CONTENT:
-${content.slice(0, 8000)}
-
-Return a JSON array. If no contradictions found, return []:
-[
-  {
-    "claim1": "First statement or claim (with context)",
-    "claim2": "Contradicting statement or claim (with context)",
-    "severity": "High",
-    "type": "Factual Contradiction",
-    "explanation": "Why these two claims are in conflict and the implications"
-  }
-]
-
-Severity: "High" | "Medium" | "Low"
-Type: "Factual Contradiction" | "Methodological Inconsistency" | "Statistical Conflict" | "Logical Fallacy" | "Scope Mismatch"
-
-Be thorough — look for subtle contradictions, not just obvious ones.`;
+  const prompt = `Carefully analyze the following content for any conflicting claims, inconsistencies, or logical contradictions between different papers or sections.
+  
+  CONTENT:
+  ${content.slice(0, 10000)}
+  
+  Return a JSON array. If no contradictions are found, return [].
+  
+  Format:
+{
+  "contradictions": [
+    {
+      "claim": "Summary of the primary claim",
+      "conflict": "Explanation of the conflict",
+      "severity": "High",
+      "sources": ["Source A", "Source B"]
+    }
+  ],
+  "evidenceMismatch": [
+    {"point": "Point of mismatch", "detail": "Technical details"}
+  ],
+  "unsupportedClaims": ["Claim 1", "Claim 2"],
+  "confidenceAnalysis": "Professional summary of the overall evidence reliability"
+}`;
 
   try {
     const raw = await callAI(prompt, { systemPrompt: SYSTEM, jsonMode: true });

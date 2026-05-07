@@ -10,11 +10,12 @@ export async function runPlanner(query) {
 
 Return JSON:
 {
-  "objective": "Clear statement of the research objective",
-  "subQuestions": ["Question 1", "Question 2", "Question 3"],
-  "approach": "Research methodology and approach",
-  "keyAreas": ["Area 1", "Area 2", "Area 3"],
-  "expectedOutcome": "What we expect to find"
+  "objective": "Primary goal of this research mission",
+  "roadmap": ["Phase 1: Literature Hunt", "Phase 2: Data Synthesis", "Phase 3: Gap Detection"],
+  "methodology": "Step-by-step analytical approach (e.g. Meta-analysis, Qualitative comparison)",
+  "subQuestions": ["Critical research question 1", "Critical research question 2"],
+  "expectedOutcome": "Detailed insight into [Topic]",
+  "researchFocus": ["Technical aspects", "Industry impact", "Theoretical limits"]
 }`;
 
   try {

@@ -37,6 +37,39 @@ router.post('/subscribe', protect, async (req, res) => {
   }
 });
 
+router.post('/upgrade', protect, async (req, res) => {
+  try {
+    const { type } = req.body;
+    console.log(`💳 Upgrade request for user ${req.user.email} to ${type}`);
+    
+    const targetPlan = type?.toUpperCase();
+    if (!PLANS[targetPlan]) {
+      console.error(`❌ Invalid plan attempted: ${targetPlan}`);
+      return res.status(400).json({ message: 'Invalid plan selected.' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id, 
+      { subscriptionType: targetPlan }, 
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      console.error('❌ User not found during upgrade');
+      return res.status(404).json({ message: 'User session not found.' });
+    }
+
+    console.log(`✅ Upgrade successful for ${user.email}`);
+    res.json({ 
+      message: `Successfully upgraded to ${targetPlan}`, 
+      subscriptionType: user.subscriptionType 
+    });
+  } catch (err) {
+    console.error('❌ Upgrade Error:', err);
+    res.status(500).json({ message: 'Internal server error during upgrade. Please try again.' });
+  }
+});
+
 // POST /api/subscription/cancel
 router.post('/cancel', protect, async (req, res) => {
   try {
