@@ -3,6 +3,7 @@ import neo4j from 'neo4j-driver';
 
 export let neo4jDriver = null;
 
+// This is our database connection file 
 export async function connectMongoDB() {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
