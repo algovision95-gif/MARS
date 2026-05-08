@@ -25,7 +25,7 @@
 
 **MARS is not a chatbot. It is an autonomous AI Research Department.**
 
-Built for researchers, startups, and enterprises who need deep, verified, multi-source intelligence — not surface-level answers.
+Built for Researchers, startups, and enterprises who need deep, verified, multi-source intelligence — not surface-level answers.
 
 </div>
 
@@ -61,7 +61,7 @@ Built for researchers, startups, and enterprises who need deep, verified, multi-
 
 ## ❗ Problem Statement
 
-Academic research is **broken**. Every year, millions of researchers, PhD students, and R&D teams spend:
+Academic Research is **broken**. Every year, millions of researchers, PhD students, and R&D teams spend:
 
 | Task | Time Wasted |
 |------|------------|
